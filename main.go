@@ -12,11 +12,11 @@ import (
 )
 
 const (
-	timeoutForJoining = 10 * time.Second
+	timeoutForJoining = 1 * time.Second
 )
 
 func main() {
-	listenAddress := flag.String("la", "", "gamne server listen address")
+	listenAddress := flag.String("la", "", "game server listen address")
 	flag.Parse()
 
 	fmt.Println("Game server starting on", *listenAddress)
@@ -53,6 +53,6 @@ func main() {
 
 	ge.StartGame()
 
-	fmt.Println("Game fiished!!!")
+	fmt.Println("Game finished!!!")
 
 }

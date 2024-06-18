@@ -49,8 +49,9 @@ func NewGameServer(ge *Game) *GameServer {
 }
 
 // Join(context.Context, *NewPlayer) (*NewPlayerAccepted, error)
+// TODO: review this bad boy
 func (gs *GameServer) Join(ctx context.Context, req *coms.NewPlayer) (*coms.NewPlayerInitialState, error) {
-	fmt.Printf("New player ask to join %s\n", req.Name)
+	fmt.Printf("New player ask to join -> %s\n", req.Name)
 
 	np := Player{
 		Name:          req.Name,
@@ -59,15 +60,15 @@ func (gs *GameServer) Join(ctx context.Context, req *coms.NewPlayer) (*coms.NewP
 
 	err := gs.game.AddNewPlayer(np)
 	if err != nil {
-		fmt.Printf("Error adding new player %s\n", err)
+		fmt.Printf("Error adding new player -> %s\n", err)
 		return nil, err
 	}
 
-	fmt.Printf("New player joined %s\n", np.Name)
+	fmt.Printf("New player joined  -> %s\n", np.Name)
 
 	return gs.game.CreateInitialState(np), nil
 }
 
 func (gs *GameServer) Turn(ctx context.Context, req *coms.NewTurn) (*coms.NewAction, error) {
-	return nil, fmt.Errorf("game server does not implement Turn sercvice")
+	return nil, fmt.Errorf("game server does not implement Turn service")
 }

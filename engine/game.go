@@ -1,6 +1,10 @@
 package engine
 
 import (
+	"bufio"
+	"log"
+	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/jonasdacruz/lighthouses_aicontest/coms"
@@ -13,12 +17,96 @@ const (
 
 type Game struct {
 	gameStartAt time.Time
+	mapMatrix   []*coms.MapRow
+	lighthouses []*coms.Lighthouse
 	players     []Player
 }
 
+func loadMap() ([]*coms.MapRow, []*coms.Lighthouse) {
+
+	mapFile := filepath.Join(os.Getenv("PWD"), "maps", "island.txt")
+	file, err := os.Open(mapFile)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	scanner.Split(bufio.ScanLines)
+	var fileLines []string
+
+	for scanner.Scan() {
+		fileLines = append(fileLines, scanner.Text())
+	}
+
+	var mapM []*coms.MapRow
+	var lighthouses []*coms.Lighthouse
+
+	for x := range fileLines {
+
+		var row coms.MapRow
+		for y, val := range fileLines[len(fileLines)-x-1] {
+
+			switch c := string(val); c {
+			case "#":
+				row.Row = append(row.Row, 0)
+
+			case "!":
+				row.Row = append(row.Row, 1)
+				pos := coms.Position{
+					X: int32(x),
+					Y: int32(y),
+				}
+				lh := coms.Lighthouse{
+					Position: &pos,
+				}
+				lighthouses = append(lighthouses, &lh)
+			default:
+				row.Row = append(row.Row, 1)
+			}
+
+		}
+		mapM = append(mapM, &row)
+	}
+	// DEBUG map
+	// for i, ri := range mapM {
+	// 	fmt.Printf("row %d -> %+v\n", i, ri)
+	// }
+	// DEBUG lighthouses
+	// fmt.Println(len(lighthouses))
+	// for _, l := range lighthouses {
+	// 	fmt.Println(l.Position.GetX(), l.Position.GetY())
+	// }
+
+	w := len(mapM[0].Row)
+	h := len(mapM)
+
+	if w != h {
+		panic("Island must be a square")
+	}
+	for i, mapR := range mapM {
+		if i == 0 || i == len(mapM)-1 {
+			for _, c := range mapR.Row {
+				if c != 0 {
+					panic("Map border must not be part of island")
+				}
+			}
+		} else {
+			if mapR.Row[0] != 0 || mapR.Row[len(mapR.Row)-1] != 0 {
+				panic("Map border must not be part of island")
+
+			}
+		}
+	}
+	return mapM, lighthouses
+}
+
 func NewGame() *Game {
+	mapM, lighthouses := loadMap()
 	return &Game{
 		gameStartAt: time.Now(),
+		mapMatrix:   mapM,
+		lighthouses: lighthouses,
 		players:     []Player{},
 	}
 }
